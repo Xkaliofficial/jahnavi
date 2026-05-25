@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>For You 💌</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root{--pink:#ff6b9d;--soft-pink:#ffb3cc;--lilac:#c084fc;--peach:#ffcba4;--deep:#7c3aed;--mint:#86efac;--text:#4a2040;--tl:#9b6b85;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{min-height:100vh;background:linear-gradient(135deg,#ffe4f0 0%,#f0e4ff 50%,#ffe4e4 100%);font-family:'Nunito',sans-serif;overflow-x:hidden;}
+    .bg-float{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+    .bg-float span{position:absolute;opacity:.15;animation:floatUp linear infinite;}
+    @keyframes floatUp{0%{transform:translateY(110vh) rotate(0deg) scale(.8);opacity:.15;}100%{transform:translateY(-10vh) rotate(720deg) scale(1.1);opacity:0;}}
+    #lock-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ffe4f0,#f0e4ff,#ffe4e4);}
+    .lock-card{background:rgba(255,255,255,.9);backdrop-filter:blur(24px);border:2px solid rgba(255,107,157,.25);border-radius:36px;padding:50px 42px;text-align:center;max-width:430px;width:92%;box-shadow:0 24px 70px rgba(255,107,157,.18);animation:cardPop .7s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes cardPop{from{transform:scale(.6) rotate(-4deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
+    .lock-top{font-size:2rem;letter-spacing:10px;margin-bottom:10px;animation:sway 3s ease-in-out infinite;}
+    @keyframes sway{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+    .lock-title{font-family:'Dancing Script',cursive;font-size:2.4rem;color:var(--pink);margin-bottom:4px;}
+    .lock-sub{font-size:.88rem;color:var(--tl);margin-bottom:6px;line-height:1.7;}
+    .lock-note{font-size:.78rem;color:var(--lilac);font-style:italic;margin-bottom:26px;padding:8px 14px;background:rgba(192,132,252,.08);border-radius:12px;border:1px dashed rgba(192,132,252,.3);}
+    .input-wrap{position:relative;margin-bottom:10px;}
+    .input-wrap input{width:100%;padding:14px 50px 14px 22px;border:2px solid rgba(255,107,157,.25);border-radius:50px;font-size:1rem;font-family:'Nunito',sans-serif;background:rgba(255,255,255,.9);color:var(--text);outline:none;transition:all .3s;}
+    .input-wrap input:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(255,107,157,.12);}
+    .toggle-pw{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--lilac);}
+    .hint-btn{background:none;border:none;cursor:pointer;color:var(--lilac);font-size:.82rem;font-family:'Nunito',sans-serif;text-decoration:underline;margin-bottom:16px;display:inline-block;transition:color .2s;}
+    .hint-btn:hover{color:var(--pink);}
+    .hint-box{background:linear-gradient(135deg,#fff0f8,#f5e6ff);border:1.5px dashed var(--soft-pink);border-radius:16px;padding:12px 18px;font-size:.84rem;color:var(--tl);margin-bottom:18px;display:none;animation:fadeSlide .4s ease;}
+    .hint-box.show{display:block;}
+    @keyframes fadeSlide{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+    .unlock-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--pink),var(--lilac));color:white;border:none;border-radius:50px;font-size:1rem;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .3s;box-shadow:0 8px 24px rgba(255,107,157,.4);}
+    .unlock-btn:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(255,107,157,.5);}
+    .wrong-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:linear-gradient(135deg,#fff0f8,#f0e4ff);border:2px solid rgba(255,107,157,.35);border-radius:20px;padding:14px 24px;font-size:.9rem;color:var(--text);box-shadow:0 12px 32px rgba(255,107,157,.2);z-index:500;transition:transform .4s cubic-bezier(.34,1.56,.64,1);text-align:center;min-width:280px;}
+    .wrong-toast.show{transform:translateX(-50%) translateY(0);}
+    .burst-overlay{position:fixed;inset:0;z-index:200;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s;}
+    .burst-overlay.pop{opacity:1;}
+    .burst-overlay span{position:absolute;font-size:2rem;animation:burst 1.4s ease-out forwards;}
+    @keyframes burst{0%{transform:translate(0,0) scale(0) rotate(0deg);opacity:1;}100%{transform:translate(var(--tx),var(--ty)) scale(1.6) rotate(var(--tr));opacity:0;}}
+    #letter-screen{display:none;position:relative;z-index:1;min-height:100vh;padding:40px 20px 100px;}
+    #letter-screen.visible{display:block;}
+    .letter-header{text-align:center;margin-bottom:36px;animation:slideDown .9s cubic-bezier(.34,1.56,.64,1) both;}
+    @keyframes slideDown{from{transform:translateY(-50px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .letter-header h1{font-family:'Dancing Script',cursive;font-size:clamp(2.6rem,8vw,4.4rem);background:linear-gradient(135deg,var(--pink),var(--lilac),var(--peach));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;margin-bottom:6px;}
+    .sparkle-row{font-size:1.6rem;letter-spacing:10px;animation:twinkle 1.8s ease-in-out infinite;}
+    @keyframes twinkle{0%,100%{opacity:1;}50%{opacity:.35;}}
+    .sticker-strip{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:32px;animation:fadeUp .8s .4s both;}
+    @keyframes fadeUp{from{transform:translateY(35px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .sticker{font-size:2.8rem;cursor:default;filter:drop-shadow(0 4px 10px rgba(0,0,0,.12));animation:stickWiggle 3s ease-in-out infinite;}
+    .sticker:nth-child(2){animation-delay:.35s}.sticker:nth-child(3){animation-delay:.7s}.sticker:nth-child(4){animation-delay:1.05s}.sticker:nth-child(5){animation-delay:1.4s}.sticker:nth-child(6){animation-delay:1.75s}
+    @keyframes stickWiggle{0%,100%{transform:rotate(-6deg) scale(1);}25%{transform:rotate(6deg) scale(1.1);}75%{transform:rotate(-4deg) scale(.93);}}
+    .envelope-wrapper{max-width:740px;margin:0 auto;animation:fadeUp .9s .6s both;}
+    .envelope-flap{height:44px;background:linear-gradient(135deg,var(--soft-pink),var(--lilac));border-radius:24px 24px 0 0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;letter-spacing:14px;}
+    .letter-card{background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border:2px solid rgba(255,107,157,.18);border-radius:0 0 36px 36px;padding:52px 44px;box-shadow:0 28px 70px rgba(255,107,157,.14);position:relative;overflow:hidden;}
+    .letter-card::before{content:'💗';position:absolute;font-size:22rem;opacity:.03;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+    .letter-card::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(transparent,transparent 38px,rgba(255,179,204,.1) 38px,rgba(255,179,204,.1) 39px);pointer-events:none;border-radius:0 0 36px 36px;}
+    .letter-date{text-align:right;color:var(--lilac);font-size:.84rem;margin-bottom:28px;font-style:italic;}
+    .letter-greeting{font-family:'Dancing Script',cursive;font-size:2.1rem;color:var(--pink);margin-bottom:26px;}
+    .cursor{display:inline-block;width:2px;height:1.8rem;background:var(--pink);margin-left:2px;animation:blink 1s infinite;vertical-align:middle;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+    .letter-body p{font-size:1.06rem;line-height:2.1;color:var(--text);margin-bottom:22px;position:relative;z-index:1;}
+    .letter-body p.highlight{background:linear-gradient(135deg,rgba(255,179,204,.22),rgba(192,132,252,.15));border-left:3px solid var(--pink);border-radius:0 14px 14px 0;padding:14px 18px;margin-left:-4px;}
+    .letter-body p.note{background:rgba(134,239,172,.12);border-left:3px solid #86efac;border-radius:0 14px 14px 0;padding:14px 18px;margin-left:-4px;font-style:italic;}
+    .letter-body p.deep{background:linear-gradient(135deg,rgba(192,132,252,.12),rgba(167,139,250,.1));border-left:3px solid var(--lilac);border-radius:0 14px 14px 0;padding:14px 18px;margin-left:-4px;}
+    .ih{display:inline-block;animation:heartBeat 1.4s ease-in-out infinite;}
+    @keyframes heartBeat{0%,100%{transform:scale(1);}50%{transform:scale(1.35);}}
+    .ibounce{display:inline-block;animation:ib 2s ease-in-out infinite;}
+    @keyframes ib{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+    .divider{display:flex;align-items:center;gap:12px;margin:28px 0;color:var(--soft-pink);font-size:1.1rem;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--soft-pink),transparent);}
+    .sorry-big{font-family:'Dancing Script',cursive;font-size:2.5rem;color:var(--pink);text-align:center;margin:10px 0 4px;animation:pulse 2.2s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.75;transform:scale(1.02);}}
+    .sorry-sub{text-align:center;color:var(--tl);font-size:.9rem;margin-bottom:28px;font-style:italic;}
+    .thank-big{font-family:'Dancing Script',cursive;font-size:2rem;background:linear-gradient(135deg,var(--lilac),var(--deep));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:8px;}
+    .thank-sub{text-align:center;color:var(--tl);font-size:.92rem;margin-bottom:32px;}
+    .memory-box{background:linear-gradient(135deg,rgba(255,203,164,.22),rgba(255,179,204,.18));border:1.5px dashed rgba(255,107,157,.35);border-radius:20px;padding:20px 22px;margin:24px 0;text-align:center;}
+    .memory-box .mem-title{font-family:'Dancing Script',cursive;font-size:1.3rem;color:var(--pink);margin-bottom:8px;}
+    .memory-box p{font-size:.9rem;color:var(--tl);line-height:1.8;}
+    .letter-sign{text-align:right;margin-top:40px;font-family:'Dancing Script',cursive;font-size:1.8rem;color:var(--lilac);z-index:1;position:relative;}
+    .bottom-strip{display:flex;justify-content:center;align-items:center;gap:18px;padding:28px 0 0;flex-wrap:wrap;}
+    .bottom-strip span{font-size:2.4rem;animation:floatBob 2s ease-in-out infinite;}
+    .bottom-strip span:nth-child(2){animation-delay:.4s}.bottom-strip span:nth-child(3){animation-delay:.8s}.bottom-strip span:nth-child(4){animation-delay:1.2s}.bottom-strip span:nth-child(5){animation-delay:1.6s}.bottom-strip span:nth-child(6){animation-delay:2s}
+    @keyframes floatBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+    .forgive-section{text-align:center;margin-top:36px;position:relative;z-index:1;}
+    .forgive-btn{padding:16px 40px;background:linear-gradient(135deg,#ff6b9d,#c084fc,#a78bfa);background-size:200% 200%;animation:gradShift 4s ease infinite;color:white;border:none;border-radius:50px;font-size:1.05rem;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;box-shadow:0 10px 30px rgba(255,107,157,.4);transition:transform .3s,box-shadow .3s;}
+    @keyframes gradShift{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+    .forgive-btn:hover{transform:scale(1.06) translateY(-3px);box-shadow:0 16px 40px rgba(255,107,157,.5);}
+    .forgive-response{margin-top:20px;font-family:'Dancing Script',cursive;font-size:1.8rem;color:var(--pink);display:none;animation:fadeSlide .6s ease;}
+    .forgive-response.show{display:block;}
+    #confetti{position:fixed;inset:0;pointer-events:none;z-index:50;}
+    @media(max-width:500px){.letter-card{padding:32px 22px;}.letter-body p{font-size:.97rem;}.sorry-big{font-size:2rem;}}
+  </style>
+</head>
+<body>
+<div class="bg-float" id="bgFloat"></div>
+<canvas id="confetti"></canvas>
+<div class="wrong-toast" id="wrongToast"><strong id="wrongTitle"></strong><br><span id="wrongMsg"></span></div>
+<div id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-top">🌸 💌 🌸</div>
+    <h2 class="lock-title">A Secret Letter</h2>
+    <p class="lock-sub">Yeh sirf ek specific person ke liye hai 🥺<br>aur tu jaanti hai yeh tera hi hai 💗</p>
+    <p class="lock-note">🔐 Password protected &bull; Only meant for you</p>
+    <div class="input-wrap">
+      <input type="password" id="pw-input" placeholder="Enter the secret password…" autocomplete="off"/>
+      <button class="toggle-pw" id="eyeBtn" onclick="togglePw()">👁️</button>
+    </div>
+    <button class="hint-btn" onclick="toggleHint()">🤭 psst… need a hint?</button>
+    <div class="hint-box" id="hintBox">
+      <strong>💡 Hint:</strong> what i use to call jab hum snapchat pe baat karte the 🧡<br>
+      <span style="font-size:.76rem;color:#c084fc;">(tu jaanti hai 😌)</span>
+    </div>
+    <button class="unlock-btn" onclick="checkPassword()">Open the Letter 💌</button>
+  </div>
+</div>
+<div class="burst-overlay" id="burstOverlay"></div>
+<div id="letter-screen">
+  <div class="letter-header">
+    <div class="sparkle-row">✨ 🌸 💗 🌸 ✨</div>
+    <h1>A Letter From The Heart</h1>
+    <div class="sparkle-row">🦋 💝 🌷 💝 🦋</div>
+  </div>
+  <div class="sticker-strip">
+    <span class="sticker">🧸</span><span class="sticker">🌸</span><span class="sticker">🌈</span>
+    <span class="sticker">🦋</span><span class="sticker">💝</span><span class="sticker">🌻</span>
+  </div>
+  <div class="envelope-wrapper">
+    <div class="envelope-flap">💌 &nbsp; 💌 &nbsp; 💌</div>
+    <div class="letter-card">
+      <div class="letter-date">Written with everything I have left 🌸</div>
+      <div class="letter-greeting">Heyy… <span class="cursor"></span></div>
+      <div class="letter-body">
+
+        <p>Idk yeh cheez tereko kabhi milegi bhi ya nai. Shayad milegi, shayad nai. But mujhe likhna tha — sirf isliye nai ki mujhe better feel ho, but isliye ki tu deserve karti hai yeh sunna. Chahe yeh ek saal baad padhe ya kabhi nai padhe. <span class="ih">💗</span></p>
+
+        <p class="highlight">Ik yeh mein tereko 1000th time sorry aur sab bol chuka hu — aur tu soch rahi hogi "yaar phir wahi sab"… but i just dk kyu aisa hojata hai merese. Genuinely. Mujhe khud nai pata. Aur yahi baat sabse zyada hurt karti hai — that i keep messing up with people i actually care about the most. 🥺</p>
+
+        <p>I am sorry I wasn't the best bestfriend you wished for. Tujhe ek aisa bestfriend chahiye tha jo hamesha hota — jo kabhi disappear nai karta — aur mein woh nai tha. Aur yeh meri failure hai, teri bilkul nai. <span class="ih">💔</span></p>
+
+        <p class="deep">Mein tereko kahi itna ghumane leke nai gaya — aur yeh cheez mujhe aaj bhi yaad aati hai randomly. We had so many unplanned plans that never happened aur sab meri wajah se. I genuinely wanted to. Tu believe kar ya nai — I wanted to. I wish apna bestfriendship aise end nai hua hota. I wish mein thoda better hota. Thoda more present. Thoda more there. <span class="ibounce">🌷</span></p>
+
+        <p>I am sorry for treating you the way I did at times. For the words, for the behaviour, for the times I made you feel like you weren't a priority — when you actually were. Tu better deserves karti thi aur mein woh de nai paya. Genuinely sorry for that.</p>
+
+        <div class="divider">🌸 🌸 🌸</div>
+
+        <p class="highlight">I won't blame this on my health — even though meri health theek nai hai. I know I am the one who ruined everything, every relation. I don't blame this on anyone — it's completely on me. Apna friendship bhi ruin hua… and trust me, I think about that more than you'd ever know. <span class="ih">💗</span></p>
+
+        <p>I tried very hard to keep my health intact. Idk sugar kitne time se chord diya — mujhe yaad bhi nai last time kab samosa khaya tha. Mera favourite tha woh. Ya woh hocco choco block ice cream <span class="ibounce">🍦</span>… woh bhi bahut miss karta hu honestly. Chhoti chhoti cheezein hain jo remind karti hain ki kitna kuch change hogaya. Health ki wajah se bahut kuch nai de paya — time, energy, presence — but mujhe pata hai yeh excuse nai hai. Tu deserve karti thi better regardless of everything.</p>
+
+        <div class="memory-box">
+          <div class="mem-title">🌸 Jo yaad aata hai 🌸</div>
+          <p>Apni jo bhi baat hoti thi — snapchat pe, voice notes mein, random late night — woh genuine thi. Real thi. Forced nai thi. Aisi dosti easily nai milti life mein. Aur mujhe pata hai yeh sab meri wajah se change hua. That's something I'll carry for a really long time. 💗</p>
+        </div>
+
+        <p class="note">Mein jaanta hu mein tereko zyada time nai de paya — aur yeh cheez mujhe genuinely regret hoti hai. Har din. Seriously. Tu mere saath thi jab mujhe chahiye tha aur mein woh properly reciprocate nai kar paya. That's not okay aur I know that.</p>
+
+        <p>Maana apne beech kitna bhi jagda hua ho — kitni bhi galat baat meri taraf se aayi ho — you were, and will always be, the <strong>best BESTFRIEND</strong> I would ever ask for. No cap. Teri jaisi dost milna easy nai hota. And I was lucky to even have that — even if I didn't act like it. <span class="ih">💝</span></p>
+
+        <p class="deep">Please live your life to the fullest. Stay happy, stay smiling — woh smile mat jaane dena apne face se. Seriously. Tu jahan bhi ho, jaise bhi ho — bus khush reh. Itni si request hai meri. Teri khushi matter karti hai. Still. Always. <span class="ibounce">🌻</span></p>
+
+        <div class="divider">💗 💗 💗</div>
+
+        <div class="sorry-big">Sorry for everything… 💗</div>
+        <p class="sorry-sub">My behaviour. My words. My actions. My silences. My absence. Everything, etc.</p>
+
+        <div class="thank-big">&amp; Thank You. For everything. 🌸</div>
+        <p class="thank-sub">Thank you for being my bestfriend. For tolerating me. For being you.<br>I mean it more than these words can say. <span class="ih">💝</span></p>
+
+      </div>
+      <div class="letter-sign">always yours (even now),<br>your dumbo 🧸</div>
+      <div class="bottom-strip">
+        <span>🌸</span><span>💗</span><span>🦋</span><span>✨</span><span>🌈</span><span>🧸</span>
+      </div>
+      <div class="forgive-section">
+        <p style="color:var(--tl);font-size:.88rem;margin-bottom:14px;font-style:italic;">(no pressure at all… just ek button hai 🥺)</p>
+        <button class="forgive-btn" onclick="onForgive()">💗 Forgive this dumbo</button>
+        <div class="forgive-response" id="forgiveResp">Yaayyy!! 🎉 Thank youuu so much 🥺💗🌸 I promise I'll do better bestie.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const fE=['💗','💕','🌸','✨','🦋','💝','🌷','⭐','🍀','🌙'];
+  const bg=document.getElementById('bgFloat');
+  for(let i=0;i<32;i++){const s=document.createElement('span');s.textContent=fE[Math.floor(Math.random()*fE.length)];s.style.left=Math.random()*100+'vw';s.style.fontSize=(.8+Math.random()*1.4)+'rem';s.style.animationDuration=(7+Math.random()*14)+'s';s.style.animationDelay=(Math.random()*12)+'s';bg.appendChild(s);}
+  function togglePw(){const i=document.getElementById('pw-input');i.type=i.type==='password'?'text':'password';document.getElementById('eyeBtn').textContent=i.type==='password'?'👁️':'🙈';}
+  function toggleHint(){document.getElementById('hintBox').classList.toggle('show');}
+  document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkPassword();});
+  const wT=['Yeh toh Jahnavi nai hai clearly 😭','Bhai yeh letter sirf ek person ke liye hai 🙅‍♀️','WRONG! Tu nai hai woh person bestie 💀','Nahi nahi — hint dekh pehle 🥲','Arre bhai galat hai 😭 dumbo ke dumbo hi jaante hain 🤫'];
+  const wTitles=['🚫 Tu nai hai woh —','❌ Arre rukk —','🙅‍♀️ Nahi bhai nahi —','😭 Galat hai yaar —','💀 Nope nope nope —'];
+  let wC=0;
+  function showWrong(){const t=document.getElementById('wrongToast');document.getElementById('wrongTitle').textContent=wTitles[wC%wTitles.length];document.getElementById('wrongMsg').textContent=wT[wC%wT.length];wC++;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3400);}
+  function checkPassword(){const v=document.getElementById('pw-input').value.trim().toLowerCase();if(v==='dumbo'){triggerUnlock();}else{showWrong();document.getElementById('pw-input').value='';}}
+  function triggerUnlock(){const o=document.getElementById('burstOverlay');o.innerHTML='';const bE=['💗','💕','✨','🌸','💝','🦋','⭐','🌷','🧸','🌈'];for(let i=0;i<30;i++){const s=document.createElement('span');s.textContent=bE[Math.floor(Math.random()*bE.length)];const a=(i/30)*360,d=100+Math.random()*160;s.style.setProperty('--tx',Math.cos(a*Math.PI/180)*d+'px');s.style.setProperty('--ty',Math.sin(a*Math.PI/180)*d+'px');s.style.setProperty('--tr',(Math.random()*360)+'deg');s.style.animationDelay=(Math.random()*.3)+'s';o.appendChild(s);}o.classList.add('pop');setTimeout(()=>{o.classList.remove('pop');document.getElementById('lock-screen').style.display='none';document.getElementById('letter-screen').classList.add('visible');launchConfetti();},1000);}
+  function launchConfetti(){const c=document.getElementById('confetti'),ctx=c.getContext('2d');c.width=window.innerWidth;c.height=window.innerHeight;const cols=['#ff6b9d','#c084fc','#ffb3cc','#ffcba4','#ffd6ff','#a78bfa','#86efac'];const ps=Array.from({length:150},()=>({x:Math.random()*c.width,y:-20,r:3+Math.random()*7,d:1.2+Math.random()*3,color:cols[Math.floor(Math.random()*cols.length)],tilt:Math.random()*30-15,ts:.08+Math.random()*.18}));let fr=0;function draw(){ctx.clearRect(0,0,c.width,c.height);ps.forEach(p=>{ctx.beginPath();ctx.ellipse(p.x,p.y,p.r,p.r*.45,p.tilt,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=.88;ctx.fill();p.y+=p.d;p.x+=Math.sin(fr*p.ts)*1.4;p.tilt+=.04;});ctx.globalAlpha=1;fr++;if(fr<260)requestAnimationFrame(draw);else ctx.clearRect(0,0,c.width,c.height);}draw();}
+  function onForgive(){document.getElementById('forgiveResp').classList.add('show');launchConfetti();const o=document.getElementById('burstOverlay');o.innerHTML='';const bE=['💗','💕','✨','🌸','🎉','🥳','🧸'];for(let i=0;i<20;i++){const s=document.createElement('span');s.textContent=bE[Math.floor(Math.random()*bE.length)];const a=(i/20)*360,d=60+Math.random()*120;s.style.setProperty('--tx',Math.cos(a*Math.PI/180)*d+'px');s.style.setProperty('--ty',Math.sin(a*Math.PI/180)*d+'px');s.style.setProperty('--tr',(Math.random()*360)+'deg');o.appendChild(s);}o.classList.add('pop');setTimeout(()=>o.classList.remove('pop'),1200);}
+  window.addEventListener('resize',()=>{const c=document.getElementById('confetti');c.width=window.innerWidth;c.height=window.innerHeight;});
+</script>
+</body>
+</html>
